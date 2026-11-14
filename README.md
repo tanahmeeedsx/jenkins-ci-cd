@@ -1,4 +1,4 @@
-# NotesHub — DevOps CI/CD Project
+# NotesHub — Jenkins CI/CD Project
 
 A full-stack notes application deployed on AWS using Terraform, Ansible,
 Jenkins, Docker, and Docker Compose.
