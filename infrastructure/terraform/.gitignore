@@ -14,3 +14,4 @@ override.tf.json
 *_override.tf.json
 
 # Keep .terraform.lock.hcl tracked for reproducible provider installs
+tfplan
