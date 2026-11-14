@@ -10,3 +10,19 @@ coverage/
 *.log
 .DS_Store
 .vite/
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+terraform.tfvars
+crash.log
+
+# Ansible
+infrastructure/ansible/inventory/inventory.ini
+*.retry
+
+# SSH keys
+*.pem
+*.key

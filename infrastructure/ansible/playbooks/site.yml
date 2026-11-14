@@ -1,0 +1,131 @@
+---
+- name: Configure Jenkins Controller
+  hosts: jenkins
+  become: true
+
+  tasks:
+    - name: Install Java, Docker, Git and dependencies
+      ansible.builtin.apt:
+        name:
+          - openjdk-21-jre
+          - fontconfig
+          - docker.io
+          - docker-compose-v2
+          - git
+          - curl
+          - ca-certificates
+        state: present
+        update_cache: true
+
+    - name: Configure Node.js 22 repository
+      ansible.builtin.shell: |
+        set -o pipefail
+        curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+      args:
+        executable: /bin/bash
+      changed_when: false
+
+    - name: Install Node.js 22
+      ansible.builtin.apt:
+        name: nodejs
+        state: present
+        update_cache: true
+
+    - name: Create Jenkins repository keyring directory
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Download Jenkins repository signing key
+      ansible.builtin.get_url:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+        dest: /etc/apt/keyrings/jenkins.asc
+        mode: '0644'
+
+    - name: Add Jenkins repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/etc/apt/keyrings/jenkins.asc] https://pkg.jenkins.io/debian-stable binary/"
+        filename: jenkins
+        state: present
+
+    - name: Install Jenkins LTS
+      ansible.builtin.apt:
+        name: jenkins
+        state: present
+        update_cache: true
+
+    - name: Add Jenkins user to Docker group
+      ansible.builtin.user:
+        name: jenkins
+        groups: docker
+        append: true
+
+    - name: Enable Docker
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Enable Jenkins
+      ansible.builtin.service:
+        name: jenkins
+        state: started
+        enabled: true
+
+    - name: Restart Jenkins to apply Docker group membership
+      ansible.builtin.service:
+        name: jenkins
+        state: restarted
+
+
+- name: Configure NotesHub App Server
+  hosts: app
+  become: true
+
+  vars_prompt:
+    - name: jwt_secret
+      prompt: "Enter a strong JWT_SECRET (generate with openssl rand -hex 32)"
+      private: true
+      confirm: true
+
+  tasks:
+    - name: Install Docker, Compose and Git
+      ansible.builtin.apt:
+        name:
+          - docker.io
+          - docker-compose-v2
+          - git
+          - curl
+          - ca-certificates
+        state: present
+        update_cache: true
+
+    - name: Add Ubuntu user to Docker group
+      ansible.builtin.user:
+        name: ubuntu
+        groups: docker
+        append: true
+
+    - name: Enable Docker
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Create NotesHub deployment directory
+      ansible.builtin.file:
+        path: /home/ubuntu/noteshub
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0750'
+
+    - name: Create NotesHub environment file
+      ansible.builtin.copy:
+        content: "JWT_SECRET={{ jwt_secret }}\n"
+        dest: /home/ubuntu/noteshub/.env
+        owner: ubuntu
+        group: ubuntu
+        mode: '0600'
+      no_log: true

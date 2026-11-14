@@ -1,0 +1,4 @@
+aws_region       = "us-west-2"
+project_name     = "noteshub"
+key_name         = "YOUR_EXISTING_EC2_KEY_PAIR"
+allowed_ssh_cidr = "YOUR_PUBLIC_IP/32"

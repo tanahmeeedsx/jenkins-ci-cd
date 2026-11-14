@@ -1,0 +1,9 @@
+[jenkins]
+JENKINS_PUBLIC_IP ansible_user=ubuntu
+
+[app]
+APP_PUBLIC_IP ansible_user=ubuntu
+
+[all:vars]
+ansible_ssh_private_key_file=~/.ssh/noteshub-ec2.pem
+ansible_python_interpreter=/usr/bin/python3
