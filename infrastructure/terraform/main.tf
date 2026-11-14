@@ -128,7 +128,7 @@ resource "aws_security_group" "app" {
 
 resource "aws_instance" "jenkins" {
   ami                         = data.aws_ami.ubuntu.id
-  instance_type               = "t3.medium"
+  instance_type               = "c7i-flex.large"
   key_name                    = var.key_name
   subnet_id                   = aws_subnet.public.id
   vpc_security_group_ids      = [aws_security_group.jenkins.id]
@@ -145,7 +145,7 @@ resource "aws_instance" "jenkins" {
   }
 
   tags = {
-    Name    = "${var.project_name}-jenkins"
+    Name    = "${var.project_name}-master-node"
     Project = var.project_name
   }
 }
@@ -169,7 +169,7 @@ resource "aws_instance" "app" {
   }
 
   tags = {
-    Name    = "${var.project_name}-app"
+    Name    = "${var.project_name}-slave-node"
     Project = var.project_name
   }
 }

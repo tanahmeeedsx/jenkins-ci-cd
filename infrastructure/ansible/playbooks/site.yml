@@ -37,17 +37,19 @@
         state: directory
         mode: '0755'
 
-    - name: Download Jenkins repository signing key
+    - name: Download current Jenkins repository signing key
       ansible.builtin.get_url:
-        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
-        dest: /etc/apt/keyrings/jenkins.asc
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
+        dest: /usr/share/keyrings/jenkins-keyring.asc
         mode: '0644'
+        force: true
 
-    - name: Add Jenkins repository
-      ansible.builtin.apt_repository:
-        repo: "deb [signed-by=/etc/apt/keyrings/jenkins.asc] https://pkg.jenkins.io/debian-stable binary/"
-        filename: jenkins
-        state: present
+    - name: Configure Jenkins LTS repository
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/jenkins.list
+        content: |
+          deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/
+        mode: '0644'
 
     - name: Install Jenkins LTS
       ansible.builtin.apt:
